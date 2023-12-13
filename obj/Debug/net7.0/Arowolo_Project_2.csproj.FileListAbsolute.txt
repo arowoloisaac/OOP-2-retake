@@ -1,0 +1,14 @@
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.AssemblyInfoInputs.cache
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.AssemblyInfo.cs
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.csproj.CoreCompileInputs.cache
+C:\Users\arowo\source\repos\Arowolo_Project_2\bin\Debug\net7.0\Arowolo_Project_2.exe
+C:\Users\arowo\source\repos\Arowolo_Project_2\bin\Debug\net7.0\Arowolo_Project_2.deps.json
+C:\Users\arowo\source\repos\Arowolo_Project_2\bin\Debug\net7.0\Arowolo_Project_2.runtimeconfig.json
+C:\Users\arowo\source\repos\Arowolo_Project_2\bin\Debug\net7.0\Arowolo_Project_2.dll
+C:\Users\arowo\source\repos\Arowolo_Project_2\bin\Debug\net7.0\Arowolo_Project_2.pdb
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.dll
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\refint\Arowolo_Project_2.dll
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.pdb
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\Arowolo_Project_2.genruntimeconfig.cache
+C:\Users\arowo\source\repos\Arowolo_Project_2\obj\Debug\net7.0\ref\Arowolo_Project_2.dll
