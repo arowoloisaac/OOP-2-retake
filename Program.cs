@@ -24,6 +24,15 @@ while (true)
     else
     {
         Console.WriteLine($"Hello: {activeUser.Email}");
+
+        if (activeUser.ActiveWallet == null)
+        {
+
+        }
+        else
+        {
+            Console.WriteLine($"Active Wallet: {activeUser.ActiveWallet.WalletName}");
+        }
         Console.WriteLine("1 > Create Wallet");
         Console.WriteLine("2 > Choose Wallet");
         Console.WriteLine("3 > Show my wallets");
