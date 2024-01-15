@@ -3,6 +3,7 @@ using Arowolo_Project_2.Services;
 using Arowolo_Project_2;
 using System.Globalization;
 using Arowolo_Project_2.Enums;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 while (true)
 {
@@ -139,8 +140,6 @@ static void Register(IBusinessLogicService service)
     var email = Console.ReadLine();
     Console.WriteLine("Type your password:");
     var pass = Console.ReadLine();
-    /*Console.WriteLine("Type your birthdate in format 'dd.mm.yyyy':");
-    var birthDate = Console.ReadLine();*/
     var result = service.Register(email, pass, name);
     Console.ForegroundColor = result.Item1 ? ConsoleColor.Green : ConsoleColor.Red;
     Console.WriteLine(result.Item2);
@@ -211,7 +210,7 @@ static void ShowWallets(IBusinessLogicService service)
     {
         walletId++;
         string money = $"{item.Money.GetIntegerPart()}.{item.Money.GetFractionalPart()}";
-        Console.WriteLine(walletId + " " + item.WalletName + " " + item.Currency.ToString() + " " + money);
+        Console.WriteLine($"{walletId} {item.WalletName} {item.Currency.ToString()} {money}");
     }
     Console.ReadLine();
 }
@@ -221,13 +220,18 @@ static void ChooseWallet(IBusinessLogicService service)
 {
     Console.Clear();
 
-    var list = service.GetWallets();
+    var wallets = service.GetWallets();
 
-    if (list.Any()) { }
+    if (!wallets.Any())
+    {
+        Console.WriteLine("No wallets available to choose.");
+        Console.ReadLine();
+        return;
+    }
 
     Console.WriteLine("List of wallets");
     int walletId = 0;
-    foreach (var item in list)
+    foreach (var item in wallets)
     {
         walletId++;
         Console.WriteLine(walletId + " " + item.WalletName);
@@ -237,13 +241,20 @@ static void ChooseWallet(IBusinessLogicService service)
     Console.WriteLine("Enter Wallet Index");
     var index = Console.ReadLine();
 
-    int convertId = Convert.ToInt32(index);
+    if (int.TryParse(index, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= wallets.Count)
+    {
+        var chooseWalletResult = service.ChooseWallet(selectedIndex - 1);
 
-    var walletSelected = service.ChooseWallet(convertId - 1);
-
-    Console.ForegroundColor = walletSelected.Item1 ? ConsoleColor.Green : ConsoleColor.Red;
-    Console.WriteLine(walletSelected.Item2);
-    Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = chooseWalletResult.Item1 ? ConsoleColor.Green : ConsoleColor.Red;
+        Console.WriteLine(chooseWalletResult.Item2);
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Invalid wallet index. Selection aborted.");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
     Console.ReadLine();
 }
 
@@ -252,22 +263,46 @@ static void DeleteWallet(IBusinessLogicService service)
 {
     Console.Clear();
     var list = service.GetWallets();
-    if (list.Any())
-    {
 
-    }
-    int i = 1;
-    foreach (var item in service.GetWallets())
+    if (list == null)
     {
-        Console.WriteLine(i + "  " + item.WalletName);
+        Console.WriteLine("No Wallet"); 
+    }
+
+    if (!list.Any())
+    {
+        Console.WriteLine("No wallets available for deletion.");
+        Console.ReadLine();
+        return;
+    }
+
+    int i = 1;
+    foreach (var item in list)
+    {
+        Console.WriteLine(i + " " + item.WalletName);
         i++;
     }
+
     Console.WriteLine("choose your Wallet index:");
     var index = Console.ReadLine();
-    var result = service.DeleteWallet(Convert.ToInt32(index) - 1);
-    Console.ForegroundColor = result.Item1 ? ConsoleColor.Green : ConsoleColor.Red;
-    Console.WriteLine(result.Item2);
-    Console.ForegroundColor = ConsoleColor.White;
+
+    if (int.TryParse(index, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= list.Count)
+    {
+        var result = service.DeleteWallet(selectedIndex - 1);
+        i = 1;
+        foreach (var item in list)
+        {
+            Console.WriteLine(i + " " + item.WalletName);
+            i++;
+        }
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Invalid wallet index. Deletion aborted.");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
     Console.ReadLine();
 }
 
@@ -276,13 +311,28 @@ static void CheckStatistics(IBusinessLogicService service)
     Console.Clear();
 
     Console.WriteLine("Check your staistics collection here: ");
-    Console.WriteLine("Enter the FROM date in format 'dd.MM.yyyy': ");
-    var from = Console.ReadLine();
+    DateTime from;
+    do
+    {
+        Console.WriteLine("Enter the FROM date in format 'dd.MM.yyyy': ");
+    } while (!DateTime.TryParseExact(Console.ReadLine(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out from));
 
-    Console.WriteLine("Enter the TO date in format 'dd.MM.yyyy': ");
-    var to = Console.ReadLine();
+    DateTime to;
+    do
+    {
+        Console.WriteLine("Enter the TO date in format 'dd.MM.yyyy': ");
+    } while (!DateTime.TryParseExact(Console.ReadLine(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out to));
 
-    var checkStats = service.CheckStatistics(from, to);
+    if (to < from)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("TO date cannot be earlier than FROM date. Please try again.");
+        Console.ResetColor();
+        Console.ReadLine();
+        return;
+    }
+
+    var checkStats = service.CheckStatistics(from.ToString("dd.MM.yyyy"), to.ToString("dd.MM.yyyy"));
 
     Console.ForegroundColor = checkStats.Item1 ? ConsoleColor.Green : ConsoleColor.Red;
     Console.WriteLine(checkStats.Item2);
@@ -317,11 +367,7 @@ static void AddOperation(IBusinessLogicService service)
                 case 1:
                     Console.WriteLine("Type amount value to be Added:[1.50]");
                     var value = Console.ReadLine();
-                    Console.WriteLine("Choose category:");
-                    Console.WriteLine("1 > Salary");
-                    Console.WriteLine("2 > Scholarship");
-                    Console.WriteLine("3 > Other");
-                    Console.WriteLine("Select the category you want to add:");
+                    DisplayIncomeCategories();
                     var category = Console.ReadLine();
                     Console.WriteLine("choose date in format 'dd.mm.yyyy':");
                     var date = Console.ReadLine();
@@ -343,18 +389,7 @@ static void AddOperation(IBusinessLogicService service)
                 case 2:
                     Console.WriteLine("Type value amount to be Added:[1.50]");
                     var expValue = Console.ReadLine();
-                    Console.WriteLine("Choose category:");
-                    Console.WriteLine("1 > Food");
-                    Console.WriteLine("2 > Restaurant");
-                    Console.WriteLine("3 > Medicine");
-                    Console.WriteLine("4 > Sport");
-                    Console.WriteLine("5 > Taxi");
-                    Console.WriteLine("6 > Rent");
-                    Console.WriteLine("7 > Inverstments");
-                    Console.WriteLine("8 > Clothes");
-                    Console.WriteLine("9 > Fan");
-                    Console.WriteLine("10 > other");
-                    Console.WriteLine("Select the category Index: ");
+                    DisplayExpenseCategories();
                     var expCategory = Console.ReadLine();
                     Console.WriteLine("choose date in format 'dd.mm.yyyy':");
                     var expdate = Console.ReadLine();
@@ -382,4 +417,28 @@ static void AddOperation(IBusinessLogicService service)
         }
     }
 
+}
+
+
+static void DisplayIncomeCategories()
+{
+    Console.WriteLine("1 > Salary");
+    Console.WriteLine("2 > Scholarship");
+    Console.WriteLine("3 > Other");
+    Console.WriteLine("Select the category you want to add:");
+}
+
+static void DisplayExpenseCategories()
+{
+    Console.WriteLine("1 > Food");
+    Console.WriteLine("2 > Restaurant");
+    Console.WriteLine("3 > Medicine");
+    Console.WriteLine("4 > Sport");
+    Console.WriteLine("5 > Taxi");
+    Console.WriteLine("6 > Rent");
+    Console.WriteLine("7 > Investments");
+    Console.WriteLine("8 > Clothes");
+    Console.WriteLine("9 > Fan");
+    Console.WriteLine("10 > Other");
+    Console.WriteLine("Select the category Index:");
 }

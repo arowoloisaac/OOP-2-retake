@@ -45,22 +45,25 @@ namespace Arowolo_Project_2
             Operations.Add(value);
         }
 
-
         public (List<(Money Amount, DateTime Date, IncomeType Type)> Incomes, List<(Money Amount, DateTime Date, ExpenseType Type)> Expenses) CheckStatistics(DateTime from, DateTime to)
         {
-            var incomesList = Operations
-                .Where(x => x.Date >= from && x.Date.Date <= to && x is Income)
-                .Cast<Income>()
+            var incomesList = GetFilteredOperations<Income>(from, to)
                 .Select(income => (income.Value, income.Date.Date, income.IncomeType))
                 .ToList();
 
-            var expensesList = Operations
-                .Where(x => x.Date >= from && x.Date.Date <= to && x is Expense)
-                .Cast<Expense>()
+            var expensesList = GetFilteredOperations<Expense>(from, to)
                 .Select(expense => (expense.Value, expense.Date.Date, expense.ExpenseType))
                 .ToList();
 
             return (incomesList, expensesList);
+        }
+        
+
+        IEnumerable<T> GetFilteredOperations<T>(DateTime from, DateTime to) where T : Operation
+        {
+            return Operations
+                .Where(x => x.Date >= from && x.Date.Date <= to && x is T)
+                .Cast<T>();
         }
 
     }

@@ -134,7 +134,7 @@ namespace Arowolo_Project_2.Services
             }
             catch (KeyNotFoundException)
             {
-                return (false, "No wallet of such index");
+                return (false, "No wallet with such index");
             }
         }
 
@@ -163,27 +163,23 @@ namespace Arowolo_Project_2.Services
             }
 
             var statistics = user.ActiveWallet.CheckStatistics(fromParsed, toParsed);
-
+            //Console.WriteLine(statistics);
             var combinedTransactions = new List<(Money Amount, DateTime Date, string Type, string Category)>();
 
+             combinedTransactions.AddRange(statistics.Incomes.Select(income =>
+                (income.Amount, income.Date, income.Type.ToString(), "Income")));
 
-            foreach (var income in statistics.Incomes)
-            {
-                combinedTransactions.Add((income.Amount, income.Date, income.Type.ToString(), "Income"));
-            }
+            combinedTransactions.AddRange(statistics.Expenses.Select(expense =>
+                (expense.Amount, expense.Date, expense.Type.ToString(), "Expense")));
 
-            foreach (var expense in statistics.Expenses)
-            {
-                combinedTransactions.Add((expense.Amount, expense.Date, expense.Type.ToString(), "Expense"));
-            }
-
+            
             var result = new StringBuilder();
 
-            result.AppendLine("Transactions:");
+            result.AppendLine("History:");
 
-            var firstTwenty = combinedTransactions.Take(20);
+            var firstTwentyTransact = combinedTransactions.Take(20);
 
-            foreach (var transaction in firstTwenty)
+            foreach (var transaction in firstTwentyTransact)
             {
                 result.AppendLine($"Category: {transaction.Category}, Amount: {transaction.Amount}, Date: {transaction.Date}, Type: {transaction.Type}");
             }
@@ -222,33 +218,20 @@ namespace Arowolo_Project_2.Services
 
             switch (operation)
             {
-                case Expense expense:
-                    if (category is ExpenseType expenseType)
-                    {
-                        expense.ExpenseType = expenseType;
-                        user.ActiveWallet.AddOperation(expense);
-                    }
-                    else
-                    {
-                        return (false, "Invalid Expense Type");
-                    }
+                case Expense expense when category is ExpenseType expenseType:
+                    expense.ExpenseType = expenseType;
+                    user.ActiveWallet.AddOperation(expense);
                     break;
 
-                case Income income:
-                    if (category is IncomeType incomeType)
-                    {
-                        income.IncomeType = incomeType;
-                        user.ActiveWallet.AddOperation(income);
-                    }
-                    else
-                    {
-                        return (false, "Invalid income Type.");
-                    }
+                case Income income when category is IncomeType incomeType:
+                    income.IncomeType = incomeType;
+                    user.ActiveWallet.AddOperation(income);
                     break;
 
                 default:
-                    return (false, "Invalid operation type.");
+                    return (false, "Invalid operation type or category.");
             }
+
 
             return (true, "Operation successfully added");
         }
